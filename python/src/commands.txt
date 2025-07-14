@@ -1,0 +1,5 @@
+Request new key:
+curl -X POST http://mp3converter.com/upload \                 
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImphaXJvbmJlcmlndWV0ZUBnbWFpbC5jb20iLCJleHAiOjE3NTIxMDQ4NjUsImlhdCI6MTc1MjAxODQ2NSwiYWRtaW4iOnRydWV9.F4Tfa9m_fyiiD8EnfjMGXjZsb6z_fE_OPRbaJd7M-W4" \
+  -F "access={\"some\":\"data\"}" \
+  -F "file=@./testvideo.mp4"
