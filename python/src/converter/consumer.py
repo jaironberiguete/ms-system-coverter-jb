@@ -17,11 +17,16 @@ def main():
     )
 
     def callback(ch, method, properties, body):
-        err = to_mp3.start(body, fs_videos, fs_mp3s, ch)
-        if err:
-            ch.basic_nack(delivery_tag=method.delivery_tag)
-        else:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+        try:
+            err = to_mp3.start(body, fs_videos, fs_mp3s, ch)
+            print("✔️ Callback result:", err)
+        except Exception as e:
+            print(f"❌ Unexpected error in callback: {e}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+            return
+
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+
 
     channel = connection.channel()
     channel.basic_consume(

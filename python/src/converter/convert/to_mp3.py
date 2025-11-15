@@ -1,44 +1,56 @@
 import pika, json, tempfile, os
 from bson.objectid import ObjectId
 from moviepy import VideoFileClip
+from gridfs.errors import NoFile
 
 def start(message, fs_videos, fs_mp3s, channel):
     message = json.loads(message)
-
-    #empty temp file
-    tf = tempfile.NamedTemporaryFile()
-    #videos contents
-    out = fs_videos.get(ObjectId(message["video_fid"]))
-    #add vidoes content to empty file
-    tf.write(out.read())
-    #create audio from temp video file
-    audio = VideoFileClip(tf.name).audio
-    #closing the temp file, also deleting 
-    tf.close()
-
-    #write audio to its own file
-    tf_path = tempfile.gettempdir() + f"/{message['video_fid']}.mp3"
-    audio.write_audiofile(tf_path)
-
-    #save the file to mongo
-    f = open(tf_path, "rb")
-    data = f.read()
-    fid = fs_mp3s.put(data)
-    f.close()
-    os.remove(tf_path)
-
-    message["mp3_fid"] = str(fid)
+    print("🔍 Received message:", message)
 
     try:
+        out = fs_videos.get(ObjectId(message["video_fid"]))
+    except NoFile:
+        print(f"❌ No file found in GridFS with ID {message['video_fid']}")
+        return "file not found"
+
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    tf.write(out.read())
+    tf.close()
+
+    mp3_path = os.path.join(tempfile.gettempdir(), f"{message['video_fid']}.mp3")
+    fid = None  # ← PREVENT UnboundLocalError
+
+    try:
+        # Extract audio
+        audio = VideoFileClip(tf.name).audio
+        audio.write_audiofile(mp3_path)
+        audio.close()
+
+        # Save MP3 to MongoDB
+        with open(mp3_path, "rb") as f:
+            fid = fs_mp3s.put(f.read())
+
+        message["mp3_fid"] = str(fid)
+
         channel.basic_publish(
             exchange="",
             routing_key=os.environ.get("MP3_QUEUE"),
-            body= json.dumps(message),
-            properties = pika.BasicProperties(
+            body=json.dumps(message),
+            properties=pika.BasicProperties(
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
             ),
         )
-    except Exception as err:
-        fs_mp3s.delete(fid)
-        return "failed to publish message"
+        print("✅ MP3 published to queue.")
 
+    except Exception as err:
+        print("❌ Error during conversion or publishing:", err)
+        if fid:
+            fs_mp3s.delete(fid)
+        return "failed to convert or publish"
+
+    finally:
+        os.remove(tf.name)
+        if os.path.exists(mp3_path):
+            os.remove(mp3_path)
+
+    return "done"
