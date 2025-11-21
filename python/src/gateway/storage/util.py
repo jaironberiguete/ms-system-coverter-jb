@@ -1,13 +1,14 @@
 import pika, json
 
+#Upload the file
 def upload(f, fs, channel, access):
     try:
         print("File object:", type(f))
-        print("Saved video file ID:", fid)
         fid = fs.put(f.stream, filename=f.filename)
+        print("Saved video file ID:", fid)
     except Exception as err:
         print(err)
-        return f"internal server error{err}", 500
+        return f"internal server error {err}", 500
     
     message = {
         "video_fid": str(fid),
@@ -27,4 +28,5 @@ def upload(f, fs, channel, access):
     except Exception as err:
         print(err)
         fs.delete(fid)
-        return f"internal server error{err}", 500
+        return f"internal server error {err}", 500
+    

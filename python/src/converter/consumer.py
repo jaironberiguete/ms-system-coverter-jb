@@ -4,7 +4,13 @@ import gridfs
 from convert import to_mp3
 
 def main():
-    client = MongoClient("mongodb", 27017)
+    mongo_host = os.environ.get("MONGO_HOST")
+    mongo_user = os.environ.get("MONGO_USER")
+    mongo_pass = os.environ.get("MONGO_PASS")
+
+    client = MongoClient(
+        f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:27017/"
+    )
     db_videos = client.videos
     db_mp3s = client.mp3s
     #gridfs

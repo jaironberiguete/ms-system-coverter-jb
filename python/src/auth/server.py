@@ -36,19 +36,24 @@ def login():
 
 @server.route("/validate", methods=["POST"])
 def validate():
-   encoded_jwt = request.headers["Authorization"]
-   if not encoded_jwt:
-      return "missing credentials", 401
-   encoded_jwt = encoded_jwt.split(" ")[1]
+    # safe read of Authorization header (returns None if missing)
+    encoded_jwt = request.headers.get("Authorization")
+    if not encoded_jwt:
+        return "missing credentials", 401
 
-   try:
-      decoded = jwt.decode(
-         encoded_jwt, os.environ.get("JWT_SECRET"), algorithms=["HS256"]
-      )
-   except:
-      return "not authorized", 403
-   
-   return decoded, 200
+    # header "Bearer <token>" -> split and take second part
+    parts = encoded_jwt.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return "not authorized", 403
+
+    token = parts[1]
+
+    try:
+        decoded = jwt.decode(token, os.environ.get("JWT_SECRET"), algorithms=["HS256"])
+    except Exception:
+        return "not authorized", 403
+
+    return decoded, 200
 
 def createJWT(username, secret, authz):
    return jwt.encode(
