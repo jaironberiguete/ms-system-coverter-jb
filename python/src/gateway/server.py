@@ -13,8 +13,8 @@ server = Flask(__name__)
 CORS(server, supports_credentials=True)
 
 #For logging app behavior
-#logging.basicConfig(level=logging.DEBUG)
-#server.logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+server.logger.setLevel(logging.DEBUG)
 
 mongo_host = os.environ.get("MONGO_HOST")
 mongo_user = os.environ.get("MONGO_USER")
@@ -27,7 +27,7 @@ mongo_video = PyMongo(
 
 mongo_mp3 = PyMongo(
     server,
-    uri=  f"mongodb://{mongo_user}:{mongo_pass}@m{mongo_host}:27017/mp3s?authSource=admin"
+    uri=  f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:27017/mp3s?authSource=admin"
     )
 
 fs_videos = gridfs.GridFS(mongo_video.db)
