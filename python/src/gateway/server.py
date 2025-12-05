@@ -5,8 +5,16 @@ from auth import validate
 from auth_svc import access
 from storage import util
 from bson.objectid import ObjectId
+from flask_cors import CORS
+import logging
 
 server = Flask(__name__)
+#Allow frontend origin request with CORS
+CORS(server, supports_credentials=True)
+
+#For logging app behavior
+logging.basicConfig(level=logging.DEBUG)
+server.logger.setLevel(logging.DEBUG)
 
 mongo_video = PyMongo(
     server,
@@ -27,6 +35,7 @@ channel = connection.channel()
 @server.route("/login", methods=["POST"])
 def login():
     token, err = access.login(request)
+    server.logger.info(request.headers)
 
     if not err:
         return token

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import axios from "../api/axios"; // your axios instance with JWT interceptor
+import React, { useState } from "react"
 
 export default function UploadForm() {
   const [file, setFile] = useState(null);
@@ -13,27 +12,41 @@ export default function UploadForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
       setMessage("Please select a file first.");
       return;
     }
 
+    const token = localStorage.getItem("token");
+
     const formData = new FormData();
-    formData.append("file", file); // adjust the field name if needed
+    formData.append("file", file);
 
     try {
       setUploading(true);
       setMessage("");
 
-      const response = await axios.post("/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await fetch("http://mp3converter.com/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // DO NOT manually set "Content-Type" for FormData
+        },
+        body: formData,
       });
 
-      setMessage("Upload successful!");
-      setFile(null);
+      const data = await response.text(); // Or use .json() if backend returns JSON
+
+      if (response.ok) {
+        setMessage("Upload successful!");
+        setFile(null);
+      } else {
+        setMessage(`Upload failed: ${data}`);
+      }
     } catch (error) {
+      console.error("Upload error:", error);
       setMessage("Upload failed. Please try again.");
-      console.error(error);
     } finally {
       setUploading(false);
     }
