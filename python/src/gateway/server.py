@@ -16,14 +16,18 @@ CORS(server, supports_credentials=True)
 logging.basicConfig(level=logging.DEBUG)
 server.logger.setLevel(logging.DEBUG)
 
+mongo_host = os.environ.get("MONGO_HOST")
+mongo_user = os.environ.get("MONGO_USER")
+mongo_pass = os.environ.get("MONGO_PASS")
+
 mongo_video = PyMongo(
     server,
-    uri=  "mongodb://mongodb:27017/videos"
+    uri=  f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:27017/videos?authSource=admin"
     )
 
 mongo_mp3 = PyMongo(
     server,
-    uri=  "mongodb://mongodb:27017/mp3s"
+    uri=  f"mongodb://{mongo_user}:{mongo_pass}@{mongo_host}:27017/mp3s?authSource=admin"
     )
 
 fs_videos = gridfs.GridFS(mongo_video.db)
@@ -72,7 +76,7 @@ def download():
     access = json.loads(access)
     
     if access["admin"]:
-        fid_string = request.args("fid")
+        fid_string = request.args.get("fid")
         if not fid_string:
             return "fid id required", 401
         

@@ -8,8 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
 spec:
   rules:
-    - host: mp3converter.com
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
