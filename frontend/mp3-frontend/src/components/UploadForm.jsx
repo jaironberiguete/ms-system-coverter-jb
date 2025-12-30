@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
 import Mp3FlowAnimation from "../utils/Mp3FlowAnimation";
-import { UploadCloud } from "lucide-react";
+import { UploadCloud} from "lucide-react";
 import { Loader2, Music } from "lucide-react";
+import { Linkedin, Github } from "lucide-react";
+
 
 
 export default function UploadForm() {
@@ -65,7 +67,7 @@ export default function UploadForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 text-white p-2">
+    <div className="min-h-screen  to-purple-900 text-white p-2">
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Main Card */}
@@ -154,7 +156,29 @@ export default function UploadForm() {
         </div>
         
       </div>
-      <Mp3FlowAnimation />
+      {/* <Mp3FlowAnimation /> */}
+
+     <div className="mt-6 flex justify-center gap-6 pt-4 border-t border-white/10">
+      <a
+        href="https://github.com/jaironberiguete/ms-system-coverter-jb"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition"
+      >
+        <Github className="w-5 h-5" />
+        <span className="text-sm font-medium text-white">GitHub</span>
+      </a>
+
+      <a
+        href="https://www.linkedin.com/in/jairon-beriguete/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition"
+      >
+        <Linkedin className="w-5 h-5" />
+        <span className="text-sm font-medium text-white">LinkedIn</span>
+      </a>
+    </div>
     </div>
   );
 }
